@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestConfig(t *testing.T) {
+func TestTask(t *testing.T) {
 	t.Run("Parse Toml config file", func(t *testing.T) {
 		task, err := ParseFile("../../testdata/task.toml")
 		assert.NoError(t, err)
