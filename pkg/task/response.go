@@ -6,6 +6,12 @@ import "time"
 type response struct {
 	StatusCode uint32        `csv:"status_code"`
 	Duration   time.Duration `csv:"duration"`
-	Error      error         `csv:"error"`
-	Body       string        `csv:"body"`
+	Error      error         `csv:"-"`
+	Body       responseBody  `csv:"body"`
+}
+
+type responseBody []byte
+
+func (rb *responseBody) MarshalCSV() (string, error) {
+	return string(*rb), nil
 }

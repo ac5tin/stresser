@@ -118,7 +118,7 @@ func (t *Task) exec() (*response, error) {
 		// body
 		buf := bytes.NewBuffer(nil)
 		buf.ReadFrom(resp.Body)
-		res.Body = buf.String()
+		res.Body = buf.Bytes()
 	}
 
 	// ensure statuscode is in AcceptedStatusCodes
@@ -127,6 +127,6 @@ func (t *Task) exec() (*response, error) {
 			return &res, nil
 		}
 	}
-
+	res.Error = UnacceptableStatusCode
 	return &res, UnacceptableStatusCode
 }

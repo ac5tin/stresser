@@ -32,7 +32,7 @@ func (r *Results) Render() {
 }
 
 // ExportResponsesToFile exports the responses to a CSV file
-func (r *Results) ExportResponsesToFile(filepath string) error {
+func (r *Results) ExportResponsesToFile(filepath string, onlyErr bool) error {
 	// create file if not already exist
 	file, err := os.OpenFile(filepath, os.O_RDWR|os.O_CREATE, os.ModePerm)
 	if err != nil {
@@ -41,7 +41,18 @@ func (r *Results) ExportResponsesToFile(filepath string) error {
 			return err
 		}
 	}
-	if err := gocsv.MarshalFile(&r.responses, file); err != nil {
+	// skip errors
+	exp := r.responses
+	if onlyErr {
+		exp = make([]response, 0)
+		for _, resp := range r.responses {
+			if resp.Error != nil {
+				exp = append(exp, resp)
+			}
+		}
+	}
+
+	if err := gocsv.MarshalFile(&exp, file); err != nil {
 		return err
 	}
 	return nil
