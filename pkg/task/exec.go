@@ -12,6 +12,19 @@ import (
 
 // Execute task
 func (t *Task) Execute(cfg *Config) (*Results, error) {
+	// ensure config is valid
+	{
+		if cfg.Concurrency == 0 {
+			return nil, ErrInvalidConcurrencyNumber
+		}
+		if cfg.Total == 0 {
+			return nil, ErrInvalidTotalNumber
+		}
+		if cfg.Concurrency > uint16(cfg.Total) {
+			return nil, ErrConcurrencyGreaterThanTotal
+		}
+	}
+
 	success := uint32(0)
 	fails := uint32(0)
 	durations := make([]time.Duration, cfg.Total, cfg.Total)
