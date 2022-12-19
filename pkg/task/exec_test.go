@@ -51,7 +51,7 @@ func TestExec(t *testing.T) {
 			Total:       30,
 		})
 		assert.NoError(t, err)
-		t.Logf("%v", *r)
+		assert.Equal(t, uint32(30), r.SuccessCount)
 	})
 
 	t.Run("Failed Results", func(t *testing.T) {
@@ -67,6 +67,6 @@ func TestExec(t *testing.T) {
 			Total:       30,
 		})
 		assert.NoError(t, err)
-		t.Logf("%v", *r)
+		assert.Equal(t, uint32(30), r.FailedCount)
 	})
 }
