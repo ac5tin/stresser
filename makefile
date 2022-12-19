@@ -1,3 +1,6 @@
+build:
+	go build -o ./bin/stresser ./cmd/app
+
 test:
 	go test -race -timeout 30s -v $$(go list ./... | grep -v /tests/mocks/)
 

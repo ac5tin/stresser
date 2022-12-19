@@ -48,9 +48,24 @@ func (t *Task) Execute(cfg *Config) (*Results, error) {
 
 	// calculate results
 	r := Results{
-		Duration:     totalDuration,
-		FailedCount:  fails,
-		SuccessCount: success,
+		Duration:        totalDuration,
+		FailedCount:     fails,
+		SuccessCount:    success,
+		MinDuration:     durations[0],
+		MaxDuration:     durations[0],
+		AverageDuration: totalDuration / time.Duration(cfg.Total),
+	}
+
+	for _, d := range durations {
+		if d == 0 {
+			continue
+		}
+		if d > r.MaxDuration {
+			r.MaxDuration = d
+		}
+		if d < r.MinDuration {
+			r.MinDuration = d
+		}
 	}
 
 	return &r, nil

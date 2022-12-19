@@ -1,6 +1,9 @@
 package task
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 // Results contain the results of a task execution
 type Results struct {
@@ -16,4 +19,9 @@ type Results struct {
 	MaxDuration time.Duration
 	// Average time taken to execute a request
 	AverageDuration time.Duration
+}
+
+// Render the results
+func (r *Results) Render() {
+	fmt.Printf("\nTotal Duration: %v\nAvg. Duration %v\nMin. Duration %v\nMax Duration %v\nSuccess: %d\nFailed: %d", r.Duration, r.AverageDuration, r.MinDuration, r.MaxDuration, r.SuccessCount, r.FailedCount)
 }
