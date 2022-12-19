@@ -33,8 +33,9 @@ func (r *Results) Render() {
 
 // ExportResponsesToFile exports the responses to a CSV file
 func (r *Results) ExportResponsesToFile(filepath string, onlyErr bool) error {
-	// create file if not already exist
-	file, err := os.OpenFile(filepath, os.O_RDWR|os.O_CREATE, os.ModePerm)
+	// create file if not already exist, else overwrite
+
+	file, err := os.OpenFile(filepath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, os.ModePerm)
 	if err != nil {
 		file, err = os.Create(filepath)
 		if err != nil {
