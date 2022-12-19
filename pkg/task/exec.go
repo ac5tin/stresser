@@ -48,7 +48,7 @@ func (t *Task) Execute(cfg *Config) (*Results, error) {
 
 	// calculate results
 	r := Results{
-		Duration:     uint32(totalDuration),
+		Duration:     totalDuration,
 		FailedCount:  fails,
 		SuccessCount: success,
 	}
