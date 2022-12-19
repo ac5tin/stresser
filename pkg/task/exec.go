@@ -14,7 +14,7 @@ import (
 func (t *Task) Execute(cfg *Config) (*Results, error) {
 	success := uint32(0)
 	fails := uint32(0)
-	durations := make([]time.Duration, 0, cfg.Concurrency)
+	durations := make([]time.Duration, cfg.Total, cfg.Total)
 	totalStart := time.Now()
 
 	// concurrently run task
@@ -65,7 +65,9 @@ func (t *Task) exec() error {
 	for k, v := range t.Headers {
 		req.Header.Set(k, v)
 	}
-	client := &http.Client{}
+	client := &http.Client{
+		Timeout: time.Second * time.Duration(t.Timeout),
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		return err
