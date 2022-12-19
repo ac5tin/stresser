@@ -15,7 +15,8 @@ func TestExec(t *testing.T) {
 			Timeout:             1,
 			AcceptedStatusCodes: []uint32{200},
 		}
-		assert.NoError(t, task.exec())
+		_, err := task.exec()
+		assert.NoError(t, err)
 	})
 	t.Run("404 URL", func(t *testing.T) {
 		task := Task{
@@ -25,7 +26,8 @@ func TestExec(t *testing.T) {
 			Timeout:             1,
 			AcceptedStatusCodes: []uint32{404},
 		}
-		assert.NoError(t, task.exec())
+		_, err := task.exec()
+		assert.NoError(t, err)
 	})
 	t.Run("Non-existent site", func(t *testing.T) {
 		task := Task{
@@ -35,7 +37,8 @@ func TestExec(t *testing.T) {
 			Timeout:             1,
 			AcceptedStatusCodes: []uint32{404},
 		}
-		assert.Error(t, task.exec())
+		_, err := task.exec()
+		assert.Error(t, err)
 	})
 
 	t.Run("Successful Results", func(t *testing.T) {
@@ -52,6 +55,7 @@ func TestExec(t *testing.T) {
 		})
 		assert.NoError(t, err)
 		assert.Equal(t, uint32(30), r.SuccessCount)
+		assert.Len(t, r.responses, 30)
 	})
 
 	t.Run("Failed Results", func(t *testing.T) {

@@ -29,6 +29,7 @@ func (t *Task) Execute(cfg *Config) (*Results, error) {
 	fails := uint32(0)
 	durations := make([]time.Duration, cfg.Total, cfg.Total)
 	totalStart := time.Now()
+	responses := make([]response, cfg.Total, cfg.Total)
 
 	// concurrently run task
 	g, ctx := errgroup.WithContext(context.Background())
@@ -43,13 +44,14 @@ func (t *Task) Execute(cfg *Config) (*Results, error) {
 			default:
 				// dont block
 			}
-			start := time.Now()
-			if err := t.exec(); err != nil {
+			resp, err := t.exec()
+			responses[i] = *resp
+			if err != nil {
 				atomic.AddUint32(&fails, 1)
 				return nil
 			}
 			atomic.AddUint32(&success, 1)
-			durations[i] = time.Since(start)
+			durations[i] = resp.Duration
 			return nil
 		})
 
@@ -67,6 +69,7 @@ func (t *Task) Execute(cfg *Config) (*Results, error) {
 		MinDuration:     durations[0],
 		MaxDuration:     durations[0],
 		AverageDuration: totalDuration / time.Duration(cfg.Total),
+		responses:       responses,
 	}
 
 	for _, d := range durations {
@@ -85,10 +88,13 @@ func (t *Task) Execute(cfg *Config) (*Results, error) {
 }
 
 // exec executes the task
-func (t *Task) exec() error {
+func (t *Task) exec() (*response, error) {
+	startTime := time.Now()
+	res := response{}
 	req, err := http.NewRequest(t.Method, t.URL, bytes.NewBuffer(t.Payload))
 	if err != nil {
-		return err
+		res.Error = err
+		return &res, err
 	}
 	for k, v := range t.Headers {
 		req.Header.Set(k, v)
@@ -98,16 +104,29 @@ func (t *Task) exec() error {
 	}
 	resp, err := client.Do(req)
 	if err != nil {
-		return err
+		res.Error = err
+		return &res, err
 	}
 	defer resp.Body.Close()
+
+	// fill in response
+	{
+		// duration
+		res.Duration = time.Since(startTime)
+		// status code
+		res.StatusCode = uint32(resp.StatusCode)
+		// body
+		buf := bytes.NewBuffer(nil)
+		buf.ReadFrom(resp.Body)
+		res.Body = buf.String()
+	}
 
 	// ensure statuscode is in AcceptedStatusCodes
 	for _, code := range t.AcceptedStatusCodes {
 		if resp.StatusCode == int(code) {
-			return nil
+			return &res, nil
 		}
 	}
 
-	return UnacceptableStatusCode
+	return &res, UnacceptableStatusCode
 }
