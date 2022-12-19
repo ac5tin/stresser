@@ -6,6 +6,7 @@ import "github.com/BurntSushi/toml"
 type Task struct {
 	URL                 string
 	Headers             map[string]string
+	Method              string
 	Timeout             uint32
 	Payload             []byte
 	AcceptedStatusCodes []uint32

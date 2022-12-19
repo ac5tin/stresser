@@ -1,7 +1,9 @@
 package task
 
 import (
+	"bytes"
 	"context"
+	"net/http"
 	"sync/atomic"
 	"time"
 
@@ -56,5 +58,26 @@ func (t *Task) Execute(cfg *Config) (*Results, error) {
 
 // exec executes the task
 func (t *Task) exec() error {
-	return ErrNotImplemented
+	req, err := http.NewRequest(t.Method, t.URL, bytes.NewBuffer(t.Payload))
+	if err != nil {
+		return err
+	}
+	for k, v := range t.Headers {
+		req.Header.Set(k, v)
+	}
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	// ensure statuscode is in AcceptedStatusCodes
+	for _, code := range t.AcceptedStatusCodes {
+		if resp.StatusCode == int(code) {
+			return nil
+		}
+	}
+
+	return UnacceptableStatusCode
 }
