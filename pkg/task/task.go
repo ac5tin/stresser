@@ -8,8 +8,15 @@ type Task struct {
 	Headers             map[string]string
 	Method              string
 	Timeout             uint32
-	Payload             []byte
+	Payload             payload
 	AcceptedStatusCodes []uint32
+}
+
+type payload []byte
+
+func (p *payload) UnmarshalText(text []byte) error {
+	*p = payload(text)
+	return nil
 }
 
 // ParseFile parses Task definition from a TOML file
