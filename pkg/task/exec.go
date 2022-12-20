@@ -81,7 +81,9 @@ func (t *Task) Execute(cfg *Config) (*Results, error) {
 		responses:       responses,
 	}
 
+	durationSum := time.Duration(0)
 	for _, d := range durations {
+		durationSum += d
 		if d == 0 {
 			continue
 		}
@@ -92,6 +94,7 @@ func (t *Task) Execute(cfg *Config) (*Results, error) {
 			r.MinDuration = d
 		}
 	}
+	r.AverageDuration = durationSum / time.Duration(cfg.Total)
 
 	return &r, nil
 }
