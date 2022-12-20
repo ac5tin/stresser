@@ -29,6 +29,7 @@ func (t *Task) Execute(cfg *Config) (*Results, error) {
 	fails := uint32(0)
 	durations := make([]time.Duration, cfg.Total, cfg.Total)
 	totalStart := time.Now()
+	totalSize := 0
 	responses := make([]response, cfg.Total, cfg.Total)
 
 	// concurrently run task
@@ -45,12 +46,17 @@ func (t *Task) Execute(cfg *Config) (*Results, error) {
 				// dont block
 			}
 			resp, err := t.exec()
+			// data transfer
+			totalSize += len(resp.Body)
+
+			// response is success / error
 			responses[i] = *resp
 			if err != nil {
 				atomic.AddUint32(&fails, 1)
 				return nil
 			}
 			atomic.AddUint32(&success, 1)
+			// duration
 			durations[i] = resp.Duration
 			return nil
 		})
@@ -69,6 +75,9 @@ func (t *Task) Execute(cfg *Config) (*Results, error) {
 		MinDuration:     durations[0],
 		MaxDuration:     durations[0],
 		AverageDuration: totalDuration / time.Duration(cfg.Total),
+		Throughput:      (float64(totalSize) / totalDuration.Seconds()),
+		TotalTransfer:   float64(totalSize),
+		RequestsPerSec:  float64(cfg.Total) / totalDuration.Seconds(),
 		responses:       responses,
 	}
 
