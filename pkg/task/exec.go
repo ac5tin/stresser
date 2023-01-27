@@ -29,7 +29,7 @@ func (t *Task) Execute(cfg *Config) (*Results, error) {
 	fails := uint32(0)
 	durations := make([]time.Duration, cfg.Total, cfg.Total)
 	totalStart := time.Now()
-	totalSize := 0
+	totalSize := uint32(0)
 	responses := make([]response, cfg.Total, cfg.Total)
 
 	// concurrently run task
@@ -47,7 +47,7 @@ func (t *Task) Execute(cfg *Config) (*Results, error) {
 			}
 			resp, err := t.exec()
 			// data transfer
-			totalSize += len(resp.Body)
+			atomic.AddUint32(&totalSize, uint32(len(resp.Body)))
 
 			// response is success / error
 			responses[i] = *resp
